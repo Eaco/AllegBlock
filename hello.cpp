@@ -16,14 +16,14 @@ ALLEGRO_DISPLAY* display = NULL;
 ALLEGRO_DISPLAY_MODE disp_data;
 ALLEGRO_BITMAP* bouncer = NULL;
 ALLEGRO_BITMAP* oppo = NULL;
-ALLEGRO_BITMAP* tunity = NULL;
+ALLEGRO_BITMAP* tunity = NULL;                    //initialization of allegro data (Display, sprites etc)
 float bouncer_x, bouncer_y,bouncer_dy,bouncer_dx;
 float oppo_x, oppo_y,oppo_dy,oppo_dx;
-   bool key[4] = { false, false, false, false };
-int displayHeight = 1080;
-int displayWidth = 1920;
+   bool key[4] = { false, false, false, false };  //input bools
+int displayHeight = 1080;                     
+int displayWidth = 1920;                          //right now it's hard coded to 1920*1080, I'll fix soon
 
-struct block
+struct block                                  //block is simple enough to be a struct for now, so I wont make it a class
 {
    int height;
    int width;
@@ -37,18 +37,11 @@ struct block
 void abort_game(const char* message)
 {
     printf("%s \n", message);
-    exit(1);
+    exit(1);                            //closes window, ends task
 }
  
 void init(void)
-{
-
-
-      
-
-
-
-
+{                         //Initialization phase, usually checks for pre-existance but sometimes I'm lazy
 
     if (!al_init())
         abort_game("Failed to initialize allegro");
@@ -69,7 +62,8 @@ void init(void)
         abort_game("Failed to create timer");
  
     al_set_new_display_flags(ALLEGRO_FULLSCREEN);
-    display = al_create_display(disp_data.width, disp_data.height);
+    display = al_create_display(disp_data.width, disp_data.height);     //this is supposed to make the app fullscreen, but fails on ubuntu. (I think this is due to allegro, not me)
+
     if (!display)
         abort_game("Failed to create display");
  
@@ -92,7 +86,7 @@ void init(void)
 
 
      
-    al_set_target_bitmap(bouncer);
+    al_set_target_bitmap(bouncer);                //create's my three current "sprites"
         al_clear_to_color(al_map_rgb(255,0,255));
     al_set_target_bitmap(oppo);
         al_clear_to_color(al_map_rgb(255,255,0));
@@ -114,7 +108,7 @@ void init(void)
     done = false;
 }
  
-void shutdown(void)
+void shutdown(void)     //shutdown destroys all essentials
 {
     if (timer)
         al_destroy_timer(timer);
@@ -134,7 +128,7 @@ void shutdown(void)
 }
 
  
-void game_loop(void)
+void game_loop(void)          //here is all of the game logic
 {
    bool collision;
    int mex = 0,mey =0;
@@ -145,7 +139,7 @@ void game_loop(void)
 
 
 
-      std::vector<block> v;
+      std::vector<block> v;      //vectors of blocks
       std::vector<block> b;
 
 
@@ -200,14 +194,14 @@ void game_loop(void)
       b.push_back(blick);
       blick.posy = 900;
       blick.posx = 1700;
-      b.push_back(blick);
+      b.push_back(blick);       //all of this will be replaced by a level loader soon
   
  
-    while (!done) {
+    while (!done) {         //Actual loop
         ALLEGRO_EVENT event;
         al_wait_for_event(event_queue, &event);
 
-        for (int i = 0; i < v.size(); ++i)
+        for (int i = 0; i < v.size(); ++i)        //bounding box collision detection
         {
            if ((v[i].posy - 100 < bouncer_y && v[i].posy + 100  > bouncer_y )&& (v[i].posx+100 > bouncer_x && v[i].posx-100 < bouncer_x))
            {
@@ -236,13 +230,8 @@ void game_loop(void)
         if (event.type == ALLEGRO_EVENT_TIMER) {
 
 
-         /*controls below*/
-        mex = bouncer_x - event.mouse.x;
-        mey = bouncer_y - event.mouse.y;
-        angle = atan(mex/mey);
-        angle /=3.14159;
-        angle *= 127.5;
-        if(!collision)
+
+        if(!collision)  //this is what governs the speed of the player
         {
 
             if (bouncer_y < 0)
@@ -302,9 +291,9 @@ void game_loop(void)
 
             bouncer_x += bouncer_dx;
             bouncer_y += bouncer_dy;
-            for (int i = 0; i < v.size(); ++i)
+            for (int i = 0; i < v.size(); ++i)      //box movement
             {
-              if (!v[i].collisionio)
+              if (!v[i].collisionio)    //the v boxes move opposite to player
               {
                v[i].posy -= bouncer_dy;
                v[i].posx -= bouncer_dx;
@@ -312,7 +301,7 @@ void game_loop(void)
             }
             for (int i = 0; i < b.size(); ++i)
             {
-              if(!b[i].collisionio)
+              if(!b[i].collisionio)     //the b boxes move in the same y direction, opposite x direction
               {
                b[i].posy += bouncer_dy;
                b[i].posx -= bouncer_dx;
@@ -322,7 +311,7 @@ void game_loop(void)
             //oppo_x += oppo_dx;
 
 
-            if (bouncer_dx > 0)
+            if (bouncer_dx > 0)     //slows down the objects
             {
                bouncer_dx -= 0.25;
                oppo_dx += 0.25;
@@ -355,7 +344,7 @@ void game_loop(void)
             redraw = true;
             //update_logic();
         }
-       if (event.type == ALLEGRO_EVENT_KEY_DOWN) {
+       if (event.type == ALLEGRO_EVENT_KEY_DOWN) { //key listening 
             if (event.keyboard.keycode == ALLEGRO_KEY_ESCAPE) {
                 done = true;
             }
@@ -401,7 +390,7 @@ void game_loop(void)
         }
 
  
-        if (redraw && al_is_event_queue_empty(event_queue)) {
+        if (redraw && al_is_event_queue_empty(event_queue)) { //drawing
             redraw = false;
             al_clear_to_color(al_map_rgb(0, 0, 0));
             //update_graphics();
@@ -422,7 +411,7 @@ void game_loop(void)
 }
 
 
-int main(int argc, char* argv[])
+int main(int argc, char* argv[])  //main!
 {
     init();
     game_loop();
